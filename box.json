@@ -1,0 +1,38 @@
+{
+    "name":"cors",
+    "version":"0.0.0",
+    "author":"Eric Peterson",
+    "location":"elpete/cors#v0.0.0",
+    "homepage":"https://github.com/elpete/cors",
+    "documentation":"https://github.com/elpete/cors",
+    "repository":{
+        "type":"git",
+        "URL":"https://github.com/elpete/cors"
+    },
+    "bugs":"https://github.com/elpete/cors/issues",
+    "slug":"cors",
+    "shortDescription":"Add CORS headers to your app in one module",
+    "description":"Add CORS headers to your app in one module",
+    "type":"modules",
+    "dependencies":{
+        
+    },
+    "devDependencies":{
+        "coldbox":"^4.3.0+188",
+        "testbox":"^2.4.0+80"
+    },
+    "installPaths":{
+        "testbox":"testbox",
+        "coldbox":"tests/resources/app/coldbox"
+    },
+    "scripts":{
+        "postVersion":"package set location='elpete/cors#v`package version`'",
+        "onRelease":"publish",
+        "postPublish":"!git push && !git push --tags"
+    },
+    "ignore":[
+        "**/.*",
+        "test",
+        "tests"
+    ]
+}
