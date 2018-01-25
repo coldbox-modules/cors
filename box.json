@@ -15,7 +15,7 @@
     "description":"Add CORS headers to your app in one module",
     "type":"modules",
     "dependencies":{
-        
+
     },
     "devDependencies":{
         "coldbox":"^4.3.0+188",
@@ -34,5 +34,9 @@
         "**/.*",
         "test",
         "tests"
-    ]
+    ],
+    "testbox": {
+        "runner": "http://localhost:51647/tests/runner.cfm",
+        "verbose": false
+    }
 }
