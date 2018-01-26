@@ -13,13 +13,21 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             } );
 
             it( "sets the CORS headers directly", function() {
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
                 var event = execute( event = "Main.index", renderResults = true );
                 var headerValue = getPageContext().getResponse().getHeader( "Access-Control-Allow-Origin" );
                 expect( headerValue ).toBe( "*", "The 'Access-Control-Allow-Origin' should be set to '*'." );
             } );
 
             it( "sets the correct headers for an options request", function() {
-                prepareMock( getRequestContext() ).$( "getHTTPMethod", "OPTIONS" );
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Origin" ) )
@@ -41,7 +49,11 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             } );
 
             it( "sets the correct headers for an allowed method request", function() {
-                prepareMock( getRequestContext() ).$( "getHTTPMethod", "GET" );
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "GET" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Origin" ) )
@@ -60,17 +72,40 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             it( "can configure the allowed origins", function() {
                 getController().getConfigSettings().modules.cors.settings.allowOrigins = "example.com";
 
-                prepareMock( getRequestContext() ).$( "getHTTPMethod", "OPTIONS" );
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Origin" ) )
                     .toBe( "example.com", "The 'Access-Control-Allow-Origin' should be set to 'example.com'." );
             } );
 
+            it( "rejects the request if the origin is incorrect", function() {
+                getController().getConfigSettings().modules.cors.settings.allowOrigins = "example.com";
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "foobar.com" );
+                var event = execute( route = "/", renderResults = true );
+
+                expect( getPageContext().getResponse().getStatus() ).toBe( 403 );
+                expect( structKeyExists( getPageContext().getResponse().getHeaderNames(), "Access-Control-Allow-Origin" ) )
+                    .toBeFalse( "'Access-Control-Allow-Origin' should not be in the headers" );
+            } );
+
             it( "can configure the allowed methods", function() {
                 getController().getConfigSettings().modules.cors.settings.allowMethods = [ "OPTIONS", "GET", "POST" ];
 
-                prepareMock( getRequestContext() ).$( "getHTTPMethod", "OPTIONS" );
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Methods" ) )
@@ -80,7 +115,11 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             it( "can configure the allowed headers", function() {
                 getController().getConfigSettings().modules.cors.settings.allowHeaders = [ "Content-Type" ];
 
-                prepareMock( getRequestContext() ).$( "getHTTPMethod", "OPTIONS" );
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );;
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Headers" ) )
@@ -90,7 +129,11 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             it( "can configure if credentials are allowed", function() {
                 getController().getConfigSettings().modules.cors.settings.allowCredentials = false;
 
-                prepareMock( getRequestContext() ).$( "getHTTPMethod", "OPTIONS" );
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );;
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Credentials" ) )
@@ -100,7 +143,11 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             it( "can configure the max age", function() {
                 getController().getConfigSettings().modules.cors.settings.maxAge = 60;
 
-                prepareMock( getRequestContext() ).$( "getHTTPMethod", "OPTIONS" );
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );;
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Max-Age" ) )
@@ -114,7 +161,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin" );
+                    .$results( "Content-Type, X-Auth-Token, Origin" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Headers" ) )
