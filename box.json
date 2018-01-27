@@ -20,8 +20,8 @@
         "testbox":"^2.4.0+80"
     },
     "installPaths":{
-        "testbox":"testbox/",
-        "coldbox":"tests/resources/app/coldbox/"
+        "testbox":"testbox",
+        "coldbox":"tests/resources/app/coldbox"
     },
     "scripts":{
         "postVersion":"package set location='elpete/cors#v`package version`'"
