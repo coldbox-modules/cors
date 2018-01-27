@@ -1,9 +1,8 @@
 component extends="coldbox.system.testing.BaseTestCase" {
 
-    /**
-    * @beforeAll
-    */
-    function registerModuleUnderTest() {
+    function beforeAll() {
+        super.beforeAll();
+
         getController().getModuleService()
             .registerAndActivateModule( "cors", "testingModuleRoot" );
     }

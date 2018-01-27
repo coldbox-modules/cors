@@ -18,7 +18,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$args( "Origin", "" )
                     .$results( "example.com" );
                 var event = execute( event = "Main.index", renderResults = true );
-                var headerValue = getPageContext().getResponse().getHeader( "Access-Control-Allow-Origin" );
+                var headerValue = getHeader( "Access-Control-Allow-Origin" );
                 expect( headerValue ).toBe( "*", "The 'Access-Control-Allow-Origin' should be set to '*'." );
             } );
 
@@ -61,12 +61,21 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 expect( getHeader( "Access-Control-Allow-Credentials" ) )
                     .toBe( "true", "The 'Access-Control-Allow-Credentials' should be 'true'." );
 
-                expect( structKeyExists( getPageContext().getResponse().getHeaderNames(), "Access-Control-Allow-Methods" ) )
-                    .toBeFalse( "'Access-Control-Allow-Methods' should not be in the headers" );
-                expect( structKeyExists( getPageContext().getResponse().getHeaderNames(), "Access-Control-Allow-Headers" ) )
-                    .toBeFalse( "'Access-Control-Allow-Headers' should not be in the headers" );
-                expect( structKeyExists( getPageContext().getResponse().getHeaderNames(), "Access-Control-Max-Age" ) )
-                    .toBeFalse( "'Access-Control-Max-Age' should not be in the headers" );
+                expect( getHeaderNames() )
+                    .notToInclude(
+                        "Access-Control-Allow-Methods",
+                        "'Access-Control-Allow-Methods' should not be in the headers"
+                    );
+                expect( getHeaderNames() )
+                    .notToInclude(
+                        "Access-Control-Allow-Headers",
+                        "'Access-Control-Allow-Headers' should not be in the headers"
+                    );
+                expect( getHeaderNames() )
+                    .notToInclude(
+                        "Access-Control-Max-Age",
+                        "'Access-Control-Max-Age' should not be in the headers"
+                    );
             } );
 
             it( "can configure the allowed origins", function() {
@@ -93,9 +102,12 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "foobar.com" );
                 var event = execute( route = "/", renderResults = true );
 
-                expect( getPageContext().getResponse().getStatus() ).toBe( 403 );
-                expect( structKeyExists( getPageContext().getResponse().getHeaderNames(), "Access-Control-Allow-Origin" ) )
-                    .toBeFalse( "'Access-Control-Allow-Origin' should not be in the headers" );
+                expect( getStatusCode() ).toBe( 403 );
+                expect( getHeaderNames() )
+                    .notToInclude(
+                        "Access-Control-Allow-Origin",
+                        "'Access-Control-Allow-Origin' should not be in the headers"
+                    );
             } );
 
             it( "can configure the allowed methods", function() {
@@ -174,6 +186,33 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
     }
 
     private function getHeader( name ) {
-        return getPageContext().getResponse().getHeader( name );
+        if ( isACF() ) {
+            return getPageContext().getResponse().getResponse().getHeader( name );
+        }
+        else {
+            return getPageContext().getResponse().getHeader( name );
+        }
+    }
+
+    private function getHeaderNames() {
+        if ( isACF() ) {
+            return getPageContext().getResponse().getResponse().getHeaderNames().toArray();
+        }
+        else {
+            return getPageContext().getResponse().getHeaderNames().toArray();
+        }
+    }
+
+    private function getStatusCode() {
+        if ( isACF() ) {
+            return getPageContext().getResponse().getResponse().getStatus();
+        }
+        else {
+            return getPageContext().getResponse().getStatus();
+        }
+    }
+
+    private function isACF() {
+        return ! structKeyExists( server, "lucee" );
     }
 }

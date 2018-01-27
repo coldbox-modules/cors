@@ -10,12 +10,15 @@ component {
     this.mappings[ "/tests" ] = testsPath;
     rootPath = REReplaceNoCase( this.mappings[ "/tests" ], "tests(\\|/)", "" );
     this.mappings[ "/root" ] = rootPath;
-    this.mappings[ "/testingModuleRoot" ] = expandPath( rootPath & "../" );
+    this.mappings[ "/testingModuleRoot" ] = listDeleteAt( rootPath, listLen( rootPath, '\/' ), "\/" );
     this.mappings[ "/app" ] = testsPath & "resources/app";
     this.mappings[ "/coldbox" ] = testsPath & "resources/app/coldbox";
     this.mappings[ "/testbox" ] = rootPath & "/testbox";
 
     function onRequestStart() {
-        applicationStop();
+        if ( structKeyExists( server, "lucee" ) ) {
+            applicationStop();
+        }
     }
+
 }
