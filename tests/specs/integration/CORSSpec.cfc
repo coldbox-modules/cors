@@ -8,6 +8,12 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 getPageContext().getResponse().reset();
             } );
 
+            aroundEach( function( spec ) {
+                var originalSettings = duplicate( getController().getConfigSettings().modules.cors.settings );
+                spec.body();
+                getController().getConfigSettings().modules.cors.settings = originalSettings;
+            } );
+
             it( "activates the module", function() {
                 expect( getController().getModuleService().isModuleRegistered( "cors" ) ).toBeTrue();
             } );
@@ -131,7 +137,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
-                    .$results( "example.com" );;
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Headers" ) )
@@ -145,7 +151,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
-                    .$results( "example.com" );;
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Allow-Credentials" ) )
@@ -159,7 +165,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
-                    .$results( "example.com" );;
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 expect( getHeader( "Access-Control-Max-Age" ) )
@@ -181,6 +187,85 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
 
                 expect( getHeader( "Access-Control-Allow-Headers" ) )
                     .toBe( "Content-Type, X-Auth-Token, Origin", "The 'Access-Control-Allow-Headers' should be set to 'Content-Type, X-Auth-Token, Origin'." );
+            } );
+
+            it( "can be configured with a regex for routes to process", function() {
+                getController().getConfigSettings().modules.cors.settings.eventPattern = "Main\.doSomething$";
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
+                var event = execute( event = "Main.index", renderResults = true );
+
+                expect( getHeaderNames() )
+                    .notToInclude( "Access-Control-Allow-Origin", "The 'Access-Control-Allow-Origin' should not be set." );
+
+                getPageContext().getResponse().reset();
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
+                var event = execute( event = "Main.doSomething", renderResults = true );
+
+                expect( getHeader( "Access-Control-Allow-Origin" ) )
+                    .toBe( "*", "The 'Access-Control-Allow-Origin' should be set to '*'." );
+
+                getPageContext().getResponse().reset();
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
+                var event = execute( event = "Main.doSomethingElse", renderResults = true );
+
+                expect( getHeaderNames() )
+                    .notToInclude( "Access-Control-Allow-Origin", "The 'Access-Control-Allow-Origin' should not be set." );
+            } );
+
+            it( "can be configured with a regex for routes to process", function() {
+                getController().getConfigSettings().modules.cors.settings.eventPattern = [
+                    "Main\.doSomething$",
+                    "doSomething"
+                ];
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
+                var event = execute( event = "Main.index", renderResults = true );
+
+                expect( getHeaderNames() )
+                    .notToInclude( "Access-Control-Allow-Origin", "The 'Access-Control-Allow-Origin' should not be set." );
+
+                getPageContext().getResponse().reset();
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
+                var event = execute( event = "Main.doSomething", renderResults = true );
+
+                expect( getHeader( "Access-Control-Allow-Origin" ) )
+                    .toBe( "*", "The 'Access-Control-Allow-Origin' should be set to '*'." );
+
+                getPageContext().getResponse().reset();
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" );
+                var event = execute( event = "Main.doSomethingElse", renderResults = true );
+
+                expect( getHeader( "Access-Control-Allow-Origin" ) )
+                    .toBe( "*", "The 'Access-Control-Allow-Origin' should be set to '*'." );
             } );
         } );
     }

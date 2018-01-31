@@ -13,6 +13,7 @@ settings = {
     allowMethods = [ "DELETE", "GET", "PATCH", "POST", "PUT", "OPTIONS" ],
     allowHeaders = [ "Content-Type", "X-Auth-Token", "Origin", "Authorization" ],
     maxAge = 60 * 60 * 24, // 1 day
-    allowCredentials = true
+    allowCredentials = true,
+    eventPattern = [ "^Main\.ajax$", "api" ]
 };
 ```
