@@ -1,3 +1,10 @@
+# 31 Jan 2018 — 23:11:40 UTC
+
+### feat
+
++ __events:__ Add eventPattern to settings (#2) ([b7544a9](https://github.com/elpete/cors/commit/b7544a90c59ebb372fd3201dfabd7ff610b8d859))
+
+
 # 27 Jan 2018 — 06:09:38 UTC
 
 ### chore
