@@ -9,6 +9,10 @@ component {
 
         var settings = wirebox.getInstance( dsl = "coldbox:moduleSettings:cors" );
 
+        if ( ! shouldProcessEvent( event, settings ) ) {
+            return;
+        }
+
         if ( ! isAllowed( event, settings ) ) {
             event.setHTTPHeader( 403, "Forbidden (CORS)" );
             event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
@@ -32,6 +36,7 @@ component {
             else {
                 allowedHeaders = arrayToList( settings.allowHeaders, ", " );
             }
+            writeDump( var = allowedHeaders, output = "console" );
             event.setHTTPHeader( name = "Access-Control-Allow-Headers", value = allowedHeaders );
             event.setHTTPHeader( name = "Access-Control-Allow-Methods", value = arrayToList( settings.allowMethods, ", " ) );
             event.setHTTPHeader( name = "Access-Control-Max-Age", value = settings.maxAge );
@@ -50,6 +55,16 @@ component {
         }
         var schemeAndHost = event.isSSL() ? "https://" : "http://" & CGI.HTTP_HOST;
         return event.getHTTPHeader( "Origin" ) != schemeAndHost;
+    }
+
+    private function shouldProcessEvent( event, settings ) {
+        var eventPatterns = isSimpleValue( settings.eventPattern ) ?
+            settings.eventPattern.listToArray(",") :
+            settings.eventPattern;
+
+        return eventPatterns.reduce( function( any, pattern ) {
+            return REFind( pattern, event.getCurrentEvent() ) > 0 ? true : any;
+        }, false );
     }
 
     private function isAllowed( event, settings ) {
