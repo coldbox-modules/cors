@@ -1,3 +1,10 @@
+# 31 Jan 2018 — 23:23:01 UTC
+
+### chore
+
++ __build:__ trigger minor release ([ef05a5c](https://github.com/elpete/cors/commit/ef05a5c2fe6440716aee12fc99421d6a1953dc70))
+
+
 # 31 Jan 2018 — 23:11:40 UTC
 
 ### feat
