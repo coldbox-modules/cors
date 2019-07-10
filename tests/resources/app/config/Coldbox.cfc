@@ -41,7 +41,7 @@
 
 			//Application Aspects
 			handlerCaching 			= false,
-			eventCaching			= false,
+			eventCaching			= true,
 			viewCaching				= false
 		};
 

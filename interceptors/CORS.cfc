@@ -7,6 +7,10 @@ component {
             return;
         }
 
+        if ( isCachedEvent( event ) ) {
+            return;
+        }
+
         var settings = wirebox.getInstance( dsl = "coldbox:moduleSettings:cors" );
 
         if ( ! shouldProcessEvent( event, settings ) ) {
@@ -36,7 +40,7 @@ component {
             else {
                 allowedHeaders = arrayToList( settings.allowHeaders, ", " );
             }
-            writeDump( var = allowedHeaders, output = "console" );
+
             event.setHTTPHeader( name = "Access-Control-Allow-Headers", value = allowedHeaders );
             event.setHTTPHeader( name = "Access-Control-Allow-Methods", value = arrayToList( settings.allowMethods, ", " ) );
             event.setHTTPHeader( name = "Access-Control-Max-Age", value = settings.maxAge );
@@ -55,6 +59,11 @@ component {
         }
         var schemeAndHost = event.isSSL() ? "https://" : "http://" & CGI.HTTP_HOST;
         return event.getHTTPHeader( "Origin" ) != schemeAndHost;
+    }
+
+    private function isCachedEvent( event ) {
+        return structKeyExists( event.getEventCacheableEntry(), "cacheKey" ) &&
+            getController().getCache( "template" ).lookup( event.getEventCacheableEntry().cacheKey );
     }
 
     private function shouldProcessEvent( event, settings ) {

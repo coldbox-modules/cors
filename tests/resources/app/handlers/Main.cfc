@@ -4,7 +4,12 @@
 	function index(event,rc,prc){
 		prc.welcomeMessage = "Welcome to ColdBox!";
 		event.setView("main/index");
-	}
+    }
+
+    function cached( event, rc, prc ) cache="true" cacheTimeout="30" cacheLastAccessTimeout="15" {
+		prc.welcomeMessage = "Welcome to ColdBox Cached!";
+        event.setView( "main/index" );
+    }
 
 	// Do something
 	function doSomething(event,rc,prc){
