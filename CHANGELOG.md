@@ -1,3 +1,11 @@
+# v2.0.0
+## 10 Jul 2019 — 19:41:08 UTC
+
+### BREAKING
+
++ __CORS:__ Ignore cached events for CORS ([9d6fd4c](https://github.com/elpete/cors/commit/9d6fd4cb6c6c82dfd957f9b4007dc3fccb642acc))
+
+
 # 31 Jan 2018 — 23:23:01 UTC
 
 ### chore
