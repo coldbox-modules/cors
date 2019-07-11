@@ -18,19 +18,20 @@ component {
         }
 
         if ( ! isAllowed( event, settings ) ) {
+            event.noExecution();
             event.setHTTPHeader( 403, "Forbidden (CORS)" );
             event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
             return;
         }
 
-        var allowedOrigins = settings.allowOrigins;
-        if ( ! isSimpleValue( settings.allowOrigins ) ) {
-            allowedOrigins = arrayToList( settings.allowOrigins, ", " );
-        }
-        event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
-        event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
-
         if ( event.getHTTPMethod() == "OPTIONS" ) {
+            var allowedOrigins = settings.allowOrigins;
+            if ( ! isSimpleValue( settings.allowOrigins ) ) {
+                allowedOrigins = arrayToList( settings.allowOrigins, ", " );
+            }
+            event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
+            event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
+
             var allowedHeaders = "";
             if ( isSimpleValue( settings.allowHeaders ) ) {
                 allowedHeaders = settings.allowHeaders == "*" ?
@@ -53,12 +54,45 @@ component {
         }
     }
 
+    function postProcess( event, interceptData, buffer, rc, prc ) {
+        if ( ! isCORSRequest( event ) ) {
+            return;
+        }
+
+        var settings = wirebox.getInstance( dsl = "coldbox:moduleSettings:cors" );
+
+        if ( ! shouldProcessEvent( event, settings ) ) {
+            return;
+        }
+
+        if ( ! isAllowed( event, settings ) ) {
+            event.noExecution();
+            event.setHTTPHeader( 403, "Forbidden (CORS)" );
+            event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
+            return;
+        }
+
+        var currentHeaders = event.getResponseHeaders();
+
+        if ( ! structKeyExists( currentHeaders, "Access-Control-Allow-Origin" ) ) {
+            var allowedOrigins = settings.allowOrigins;
+            if ( ! isSimpleValue( settings.allowOrigins ) ) {
+                allowedOrigins = arrayToList( settings.allowOrigins, ", " );
+            }
+            event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
+        }
+
+        if ( ! structKeyExists( currentHeaders, "Access-Control-Allow-Credentials" ) ) {
+            event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
+        }
+    }
+
     private function isCORSRequest( event ) {
         if ( event.getHTTPHeader( "Origin", "" ) == "" ) {
             return false;
         }
         var schemeAndHost = event.isSSL() ? "https://" : "http://" & CGI.HTTP_HOST;
-        return event.getHTTPHeader( "Origin" ) != schemeAndHost;
+        return event.getHTTPHeader( "Origin", "" ) != schemeAndHost;
     }
 
     private function isCachedEvent( event ) {
