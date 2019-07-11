@@ -1,3 +1,12 @@
+# v2.0.1
+## 11 Jul 2019 — 22:08:54 UTC
+
+### fix
+
++ __Caching:__ Fix for event caching when expiring
+ ([a06dbfa](https://github.com/elpete/cors/commit/a06dbfac07879d45de5f1bea2fc9174977fca9b8))
+
+
 # v2.0.0
 ## 10 Jul 2019 — 19:41:08 UTC
 
