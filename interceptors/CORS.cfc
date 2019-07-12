@@ -116,11 +116,6 @@ component {
         }
 
         var allowedOrigins = settings.allowOrigins;
-        if ( ! isSimpleValue( settings.allowOrigins ) ) {
-            allowedOrigins = arrayToList( settings.allowOrigins, ", " );
-        }
-
-        var allowedOrigins = settings.allowOrigins;
         if ( isSimpleValue( allowedOrigins ) ) {
             if ( settings.allowOrigins == "*" ) {
                 return true;
