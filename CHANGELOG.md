@@ -1,3 +1,16 @@
+# v2.0.2
+## 15 Jul 2019 — 16:35:09 UTC
+
+### other
+
++ __\*:__ chore: remove Node dependencies
+ ([429e68c](https://github.com/elpete/cors/commit/429e68cdcbd92a6228cd95367f9d42bd9b3d3253))
++ __\*:__ fix: Move postProcess to preEvent to fit within caching lifecycle
+ ([d2184f0](https://github.com/elpete/cors/commit/d2184f01755e37d431b5f3a5c637595b41a5a04a))
++ __\*:__ fix: Remove duplicate code
+ ([091140e](https://github.com/elpete/cors/commit/091140eb50388c0d1a89910ec88d9354885727bf))
+
+
 # v2.0.1
 ## 11 Jul 2019 — 22:08:54 UTC
 
