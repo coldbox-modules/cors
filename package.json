@@ -1,8 +1,0 @@
-{
-  "scripts": {
-    "test": "testbox-runner --runner http://localhost:51647/tests/runner.cfm --directory tests.specs --recurse true --errorsOnly"
-  },
-  "devDependencies": {
-    "testbox-runner": "^0.3.0"
-  }
-}
