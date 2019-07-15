@@ -11,6 +11,10 @@ component {
             return;
         }
 
+        if ( event.getHTTPMethod() != "OPTIONS" ) {
+            return;
+        }
+
         var settings = wirebox.getInstance( dsl = "coldbox:moduleSettings:cors" );
 
         if ( ! shouldProcessEvent( event, settings ) ) {
@@ -24,37 +28,35 @@ component {
             return;
         }
 
-        if ( event.getHTTPMethod() == "OPTIONS" ) {
-            var allowedOrigins = settings.allowOrigins;
-            if ( ! isSimpleValue( settings.allowOrigins ) ) {
-                allowedOrigins = arrayToList( settings.allowOrigins, ", " );
-            }
-            event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
-            event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
+        var allowedOrigins = settings.allowOrigins;
+        if ( ! isSimpleValue( settings.allowOrigins ) ) {
+            allowedOrigins = arrayToList( settings.allowOrigins, ", " );
+        }
+        event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
+        event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
 
-            var allowedHeaders = "";
-            if ( isSimpleValue( settings.allowHeaders ) ) {
-                allowedHeaders = settings.allowHeaders == "*" ?
-                    event.getHTTPHeader( "Access-Control-Request-Headers", "" ) :
-                    settings.allowHeaders;
-            }
-            else {
-                allowedHeaders = arrayToList( settings.allowHeaders, ", " );
-            }
+        var allowedHeaders = "";
+        if ( isSimpleValue( settings.allowHeaders ) ) {
+            allowedHeaders = settings.allowHeaders == "*" ?
+                event.getHTTPHeader( "Access-Control-Request-Headers", "" ) :
+                settings.allowHeaders;
+        }
+        else {
+            allowedHeaders = arrayToList( settings.allowHeaders, ", " );
+        }
 
-            event.setHTTPHeader( name = "Access-Control-Allow-Headers", value = allowedHeaders );
-            event.setHTTPHeader( name = "Access-Control-Allow-Methods", value = arrayToList( settings.allowMethods, ", " ) );
-            event.setHTTPHeader( name = "Access-Control-Max-Age", value = settings.maxAge );
+        event.setHTTPHeader( name = "Access-Control-Allow-Headers", value = allowedHeaders );
+        event.setHTTPHeader( name = "Access-Control-Allow-Methods", value = arrayToList( settings.allowMethods, ", " ) );
+        event.setHTTPHeader( name = "Access-Control-Max-Age", value = settings.maxAge );
 
-            if ( event.isInvalidHTTPMethod() ) {
-                event.noExecution();
-                event.renderData( "plain", "Preflight OK" );
-                return;
-            }
+        if ( event.isInvalidHTTPMethod() ) {
+            event.noExecution();
+            event.renderData( "plain", "Preflight OK" );
+            return;
         }
     }
 
-    function postProcess( event, interceptData, buffer, rc, prc ) {
+    function preEvent( event, interceptData, buffer, rc, prc ) {
         if ( ! isCORSRequest( event ) ) {
             return;
         }
