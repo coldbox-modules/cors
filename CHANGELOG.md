@@ -1,3 +1,12 @@
+# v2.0.3
+## 16 Jul 2019 — 21:38:52 UTC
+
+### other
+
++ __\*:__ chore: Add debug logging for future debugging
+ ([73c0190](https://github.com/elpete/cors/commit/73c01905baaddda0a04adebc2a2e61433564a735))
+
+
 # v2.0.2
 ## 15 Jul 2019 — 16:35:09 UTC
 
