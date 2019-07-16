@@ -1,27 +1,36 @@
 component {
 
     property name="wirebox" inject="wirebox";
+    property name="log" inject="logbox:logger:{this}";
 
     function preProcess( event, interceptData, buffer, rc, prc ) {
+        log.debug( "Starting CORS lifecycle event: preProcess" );
+
         if ( ! isCORSRequest( event ) ) {
+            log.debug( "Not a CORS request. Continuing with request." );
             return;
         }
 
         if ( isCachedEvent( event ) ) {
+            log.debug( "Cached event detected. Continuing with request." );
             return;
         }
 
         if ( event.getHTTPMethod() != "OPTIONS" ) {
+            log.debug( "Not an OPTIONS request. Continuing with request." );
             return;
         }
 
         var settings = wirebox.getInstance( dsl = "coldbox:moduleSettings:cors" );
 
         if ( ! shouldProcessEvent( event, settings ) ) {
+            log.debug( "Should not process event with CORS according to CORS settings.  Continuing with request." );
             return;
         }
 
         if ( ! isAllowed( event, settings ) ) {
+            log.debug( "Method or Origin is not allowed according to CORS settings.  Aborting (403)." );
+
             event.noExecution();
             event.setHTTPHeader( 403, "Forbidden (CORS)" );
             event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
@@ -32,7 +41,9 @@ component {
         if ( ! isSimpleValue( settings.allowOrigins ) ) {
             allowedOrigins = arrayToList( settings.allowOrigins, ", " );
         }
+        log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
+        log.debug( "Setting the 'Access-Control-Allow-Credentials' header to #toString( settings.allowCredentials )#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
 
         var allowedHeaders = "";
@@ -45,11 +56,15 @@ component {
             allowedHeaders = arrayToList( settings.allowHeaders, ", " );
         }
 
+        log.debug( "Setting the 'Access-Control-Allow-Headers' header to #allowedHeaders#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Headers", value = allowedHeaders );
+        log.debug( "Setting the 'Access-Control-Allow-Methods' header to #arrayToList( settings.allowMethods, ", " )#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Methods", value = arrayToList( settings.allowMethods, ", " ) );
+        log.debug( "Setting the 'Access-Control-Max-Age' header to #settings.maxAge#." );
         event.setHTTPHeader( name = "Access-Control-Max-Age", value = settings.maxAge );
 
         if ( event.isInvalidHTTPMethod() ) {
+            log.debug( "No handler action for an OPTIONS request.  Returning a 200 OK." );
             event.noExecution();
             event.renderData( "plain", "Preflight OK" );
             return;
@@ -57,17 +72,23 @@ component {
     }
 
     function preEvent( event, interceptData, buffer, rc, prc ) {
-        if ( ! isCORSRequest( event ) ) {
+        log.debug( "Starting CORS lifecycle event: preEvent" );
+
+        if ( ! isCORSRequest( event ) && ! isCachedEvent( event ) ) {
+            log.debug( "Event is not a cached event or a CORS request. Continuing with request." );
             return;
         }
 
         var settings = wirebox.getInstance( dsl = "coldbox:moduleSettings:cors" );
 
         if ( ! shouldProcessEvent( event, settings ) ) {
+            log.debug( "Should not process event with CORS according to CORS settings.  Continuing with request." );
             return;
         }
 
         if ( ! isAllowed( event, settings ) ) {
+            log.debug( "Method or Origin is not allowed according to CORS settings.  Aborting (403)." );
+
             event.noExecution();
             event.setHTTPHeader( 403, "Forbidden (CORS)" );
             event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
@@ -81,10 +102,12 @@ component {
             if ( ! isSimpleValue( settings.allowOrigins ) ) {
                 allowedOrigins = arrayToList( settings.allowOrigins, ", " );
             }
+            log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins#." );
             event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
         }
 
         if ( ! structKeyExists( currentHeaders, "Access-Control-Allow-Credentials" ) ) {
+            log.debug( "Setting the 'Access-Control-Allow-Credentials' header to #toString( settings.allowCredentials )#." );
             event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
         }
     }
