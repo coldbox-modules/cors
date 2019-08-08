@@ -39,7 +39,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "example.com" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
-                    .$results( "example.com" );;
+                    .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 var responseHeaders = getHeaders( event );
@@ -48,7 +48,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
-                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "DELETE, GET, PATCH, POST, PUT, OPTIONS" );
+                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "OPTIONS" );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Headers" );
                 expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type, X-Auth-Token, Origin, Authorization" );
@@ -172,6 +172,27 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
                 expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "OPTIONS, GET, POST" );
+            } );
+
+            it( "can configure the allowed methods with a closure", function() {
+                getController().getConfigSettings().modules.cors.settings.allowMethods = function( event ) {
+                    return event.getHTTPMethod();
+                };
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
+                    .$results( "example.com" );
+                var event = execute( route = "/", renderResults = true );
+
+                var responseHeaders = getHeaders( event );
+
+                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
+                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "OPTIONS" );
             } );
 
             it( "can configure the allowed headers", function() {

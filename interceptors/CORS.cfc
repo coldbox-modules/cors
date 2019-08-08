@@ -61,8 +61,17 @@ component {
 
         log.debug( "Setting the 'Access-Control-Allow-Headers' header to #allowedHeaders#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Headers", value = allowedHeaders );
-        log.debug( "Setting the 'Access-Control-Allow-Methods' header to #arrayToList( settings.allowMethods, ", " )#." );
-        event.setHTTPHeader( name = "Access-Control-Allow-Methods", value = arrayToList( settings.allowMethods, ", " ) );
+
+        var allowedMethods = settings.allowMethods;
+        if ( isClosure( allowedMethods ) || isCustomFunction( allowedMethods ) ) {
+            allowedMethods = allowedMethods( event );
+        }
+        if ( isArray( allowedMethods ) ) {
+            allowedMethods = arrayToList( allowedMethods, ", " );
+        }
+        log.debug( "Setting the 'Access-Control-Allow-Methods' header to #allowedMethods#." );
+        event.setHTTPHeader( name = "Access-Control-Allow-Methods", value = allowedMethods );
+
         log.debug( "Setting the 'Access-Control-Max-Age' header to #settings.maxAge#." );
         event.setHTTPHeader( name = "Access-Control-Max-Age", value = settings.maxAge );
 
@@ -142,7 +151,14 @@ component {
     }
 
     private function isAllowed( event, settings ) {
-        if ( ! arrayContains( settings.allowMethods, event.getHTTPMethod() ) ) {
+        var allowedMethods = settings.allowMethods;
+        if ( isClosure( allowedMethods ) || isCustomFunction( allowedMethods ) ) {
+            allowedMethods = allowedMethods( event );
+        }
+        if ( isSimpleValue( allowedMethods ) ) {
+            allowedMethods = listToArray( allowedMethods, "," );
+        }
+        if ( ! arrayContains( allowedMethods, event.getHTTPMethod() ) ) {
             return false;
         }
 

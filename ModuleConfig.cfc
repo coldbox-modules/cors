@@ -9,7 +9,9 @@ component {
             allowOrigins = function( event ) {
                 return event.getHTTPHeader( "Origin", "*" );
             },
-            allowMethods = [ "DELETE", "GET", "PATCH", "POST", "PUT", "OPTIONS" ],
+            allowMethods = function( event ) {
+                return event.getHTTPMethod();
+            },
             allowHeaders = [ "Content-Type", "X-Auth-Token", "Origin", "Authorization" ],
             maxAge = 60 * 60 * 24, // 1 day
             allowCredentials = true,
