@@ -38,8 +38,11 @@ component {
         }
 
         var allowedOrigins = settings.allowOrigins;
-        if ( ! isSimpleValue( settings.allowOrigins ) ) {
-            allowedOrigins = arrayToList( settings.allowOrigins, ", " );
+        if ( isClosure( allowedOrigins ) || isCustomFunction( allowedOrigins ) ) {
+            allowedOrigins = allowedOrigins( event );
+        }
+        if ( ! isSimpleValue( allowedOrigins ) ) {
+            allowedOrigins = arrayToList( allowedOrigins, ", " );
         }
         log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
@@ -99,8 +102,11 @@ component {
 
         if ( ! structKeyExists( currentHeaders, "Access-Control-Allow-Origin" ) ) {
             var allowedOrigins = settings.allowOrigins;
-            if ( ! isSimpleValue( settings.allowOrigins ) ) {
-                allowedOrigins = arrayToList( settings.allowOrigins, ", " );
+            if ( isClosure( allowedOrigins ) || isCustomFunction( allowedOrigins ) ) {
+                allowedOrigins = allowedOrigins( event );
+            }
+            if ( ! isSimpleValue( allowedOrigins ) ) {
+                allowedOrigins = arrayToList( allowedOrigins, ", " );
             }
             log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins#." );
             event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
@@ -141,11 +147,14 @@ component {
         }
 
         var allowedOrigins = settings.allowOrigins;
+        if ( isClosure( allowedOrigins ) || isCustomFunction( allowedOrigins ) ) {
+            allowedOrigins = allowedOrigins( event );
+        }
         if ( isSimpleValue( allowedOrigins ) ) {
-            if ( settings.allowOrigins == "*" ) {
+            if ( allowedOrigins == "*" ) {
                 return true;
             }
-            allowedOrigins = listToArray( settings.allowOrigins, "," );
+            allowedOrigins = listToArray( allowedOrigins, "," );
         }
         return arrayContains( allowedOrigins, event.getHTTPHeader( "Origin", "" ) );
     }

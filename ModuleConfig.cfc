@@ -6,7 +6,9 @@ component {
 
     function configure() {
         settings = {
-            allowOrigins = "*",
+            allowOrigins = function( event ) {
+                return event.getHTTPHeader( "Origin", "*" );
+            },
             allowMethods = [ "DELETE", "GET", "PATCH", "POST", "PUT", "OPTIONS" ],
             allowHeaders = [ "Content-Type", "X-Auth-Token", "Origin", "Authorization" ],
             maxAge = 60 * 60 * 24, // 1 day

@@ -19,13 +19,16 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 prepareMock( getRequestContext() )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( event = "Main.index", renderResults = true );
 
                 var responseHeaders = getHeaders( event );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin", "The 'Access-Control-Allow-Origin' should be set." );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "*", "The 'Access-Control-Allow-Origin' should be set to '*'." );
+                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com", "The 'Access-Control-Allow-Origin' should be set to 'example.com'." );
             } );
 
             it( "sets the correct headers for an options request", function() {
@@ -33,13 +36,16 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
-                    .$results( "example.com" );
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
+                    .$results( "example.com" );;
                 var event = execute( route = "/", renderResults = true );
 
                 var responseHeaders = getHeaders( event );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "*" );
+                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
                 expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "DELETE, GET, PATCH, POST, PUT, OPTIONS" );
@@ -59,13 +65,16 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "GET" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
                 var responseHeaders = getHeaders( event );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "*" );
+                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Credentials" );
                 expect( responseHeaders[ "Access-Control-Allow-Credentials" ] ).toBe( "true" );
@@ -77,6 +86,45 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
 
             it( "can configure the allowed origins", function() {
                 getController().getConfigSettings().modules.cors.settings.allowOrigins = "example.com";
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
+                    .$results( "example.com" );
+                var event = execute( route = "/", renderResults = true );
+
+                var responseHeaders = getHeaders( event );
+
+                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
+                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
+            } );
+
+            it( "does not add headers if the origin is not allowed", function() {
+                getController().getConfigSettings().modules.cors.settings.allowOrigins = "example2.com";
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
+                    .$results( "example.com" );
+                var event = execute( route = "/", renderResults = true );
+
+                var responseHeaders = getHeaders( event );
+
+                expect( responseHeaders ).toBeEmpty( "The response should have no headers because it is not allowed" );
+            } );
+
+            it( "can accept a function for the allowed origins", function() {
+                getController().getConfigSettings().modules.cors.settings.allowOrigins = function( event ) {
+                    return event.getHTTPHeader( "Origin", "" );
+                };
 
                 prepareMock( getRequestContext() )
                     .$( "getHTTPMethod", "OPTIONS" )
@@ -114,6 +162,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
@@ -130,6 +181,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
@@ -146,6 +200,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
@@ -162,6 +219,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
@@ -181,6 +241,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "Content-Type, X-Auth-Token, Origin" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( route = "/", renderResults = true );
 
@@ -197,6 +260,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( event = "Main.index", renderResults = true );
                 var responseHeaders = getHeaders( event );
@@ -208,11 +274,14 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( event = "Main.doSomething", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "*" );
+                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
                 setup();
 
@@ -220,6 +289,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( event = "Main.doSomethingElse", renderResults = true );
                 var responseHeaders = getHeaders( event );
@@ -236,6 +308,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( event = "Main.index", renderResults = true );
                 var responseHeaders = getHeaders( event );
@@ -247,11 +322,14 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( event = "Main.doSomething", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "*" );
+                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
                 setup();
 
@@ -259,11 +337,14 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPMethod", "OPTIONS" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" );
                 var event = execute( event = "Main.doSomethingElse", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "*" );
+                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
             } );
 
             it( "skips over events that are cached", function() {
@@ -273,16 +354,22 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
                     .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
+                    .$results( "example.com" )
                     .$( "getEventCacheableKey", {} );
                 var eventOne = execute( event = "Main.cached", renderResults = true );
                 var responseHeadersOne = getHeaders( eventOne );
                 expect( responseHeadersOne ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeadersOne[ "Access-Control-Allow-Origin" ] ).toBe( "*" );
+                expect( responseHeadersOne[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
                 setup();
                 prepareMock( getRequestContext() )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
                     .$results( "example.com" )
                     .$( "getEventCacheableKey", {
                         "provider": "template",
@@ -295,7 +382,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 var eventTwo = execute( event = "Main.cached", renderResults = true );
                 var responseHeadersTwo = getHeaders( eventTwo );
                 expect( responseHeadersTwo ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeadersTwo[ "Access-Control-Allow-Origin" ] ).toBe( "*" );
+                expect( responseHeadersTwo[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
             } );
         } );
     }
