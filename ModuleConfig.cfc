@@ -12,7 +12,9 @@ component {
             allowMethods = function( event ) {
                 return event.getHTTPMethod();
             },
-            allowHeaders = [ "Content-Type", "X-Auth-Token", "Origin", "Authorization" ],
+            allowHeaders = function( event ) {
+                return event.getHTTPHeader( "Access-Control-Request-Headers", "" );
+            },
             maxAge = 60 * 60 * 24, // 1 day
             allowCredentials = true,
             eventPattern = ".*"

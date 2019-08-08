@@ -49,14 +49,18 @@ component {
         log.debug( "Setting the 'Access-Control-Allow-Credentials' header to #toString( settings.allowCredentials )#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
 
-        var allowedHeaders = "";
-        if ( isSimpleValue( settings.allowHeaders ) ) {
-            allowedHeaders = settings.allowHeaders == "*" ?
+        var allowedHeaders = settings.allowHeaders;
+        if ( isClosure( allowedHeaders ) || isCustomFunction( allowedHeaders ) ) {
+            allowedHeaders = allowedHeaders( event );
+        }
+        if ( isSimpleValue( allowedHeaders ) ) {
+            // TODO: This is needed for legacy reasons. We can remove it in the next breaking change
+            allowedHeaders = allowedHeaders == "*" ?
                 event.getHTTPHeader( "Access-Control-Request-Headers", "" ) :
-                settings.allowHeaders;
+                allowedHeaders;
         }
         else {
-            allowedHeaders = arrayToList( settings.allowHeaders, ", " );
+            allowedHeaders = arrayToList( allowedHeaders, ", " );
         }
 
         log.debug( "Setting the 'Access-Control-Allow-Headers' header to #allowedHeaders#." );

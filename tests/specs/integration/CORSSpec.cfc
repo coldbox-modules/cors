@@ -7,6 +7,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             aroundEach( function( spec ) {
                 var originalSettings = duplicate( getController().getConfigSettings().modules.cors.settings );
                 setup();
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
                 spec.body();
                 getController().getConfigSettings().modules.cors.settings = originalSettings;
             } );
@@ -214,6 +218,30 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type" );
             } );
 
+            it( "can configure the allowed headers with a closure", function() {
+                getController().getConfigSettings().modules.cors.settings.allowHeaders = function( event ) {
+                    return event.getHTTPHeader( "Access-Control-Request-Headers", "" );
+                };
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type" );
+                var event = execute( route = "/", renderResults = true );
+
+                var responseHeaders = getHeaders( event );
+
+                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Headers" );
+                expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type" );
+            } );
+
             it( "can configure if credentials are allowed", function() {
                 getController().getConfigSettings().modules.cors.settings.allowCredentials = false;
 
@@ -284,7 +312,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "example.com" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
-                    .$results( "example.com" );
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
                 var event = execute( event = "Main.index", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).notToHaveKey( "Access-Control-Allow-Origin" );
@@ -298,7 +329,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "example.com" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
-                    .$results( "example.com" );
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
                 var event = execute( event = "Main.doSomething", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
@@ -313,7 +347,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "example.com" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
-                    .$results( "example.com" );
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
                 var event = execute( event = "Main.doSomethingElse", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).notToHaveKey( "Access-Control-Allow-Origin" );
@@ -332,7 +369,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "example.com" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
-                    .$results( "example.com" );
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
                 var event = execute( event = "Main.index", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).notToHaveKey( "Access-Control-Allow-Origin" );
@@ -346,7 +386,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "example.com" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
-                    .$results( "example.com" );
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
                 var event = execute( event = "Main.doSomething", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
@@ -361,7 +404,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$results( "example.com" )
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
-                    .$results( "example.com" );
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
                 var event = execute( event = "Main.doSomethingElse", renderResults = true );
                 var responseHeaders = getHeaders( event );
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
@@ -378,7 +424,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
                     .$results( "example.com" )
-                    .$( "getEventCacheableKey", {} );
+                    .$( "getEventCacheableKey", {} )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
                 var eventOne = execute( event = "Main.cached", renderResults = true );
                 var responseHeadersOne = getHeaders( eventOne );
                 expect( responseHeadersOne ).toHaveKey( "Access-Control-Allow-Origin" );
@@ -392,6 +441,9 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     .$( "getHTTPHeader" )
                     .$args( "Origin", "*" )
                     .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Access-Control-Request-Headers", "" )
+                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" )
                     .$( "getEventCacheableKey", {
                         "provider": "template",
                         "cacheable": true,
