@@ -1,3 +1,21 @@
+# v2.1.0
+## 09 Aug 2019 — 21:57:25 UTC
+
+### chore
+
++ __build:__ Add adobe@2018 to testing matrix
+ ([ee5e50c](https://github.com/elpete/cors/commit/ee5e50ce9fbd7b326b9df4e1d2c20b45ebd2c73f))
+
+### feat
+
++ __cors:__ Dynamically determine allowed headers
+ ([25a98ba](https://github.com/elpete/cors/commit/25a98ba7eb1cb8f89170fa1e4a5a65b49db02f24))
++ __cors:__ Dynamically determine allowed methods
+ ([1e33450](https://github.com/elpete/cors/commit/1e33450725cf49fcd8ffb0c9b6258a6097374d8d))
++ __cors:__ Dynamically determine allowed origins
+ ([97cae05](https://github.com/elpete/cors/commit/97cae0531f64f57cd9ad7c66389d546f44bea0a1))
+
+
 # v2.0.3
 ## 16 Jul 2019 — 21:38:52 UTC
 
