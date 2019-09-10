@@ -1,3 +1,16 @@
+# v2.2.0
+## 10 Sep 2019 — 21:52:09 UTC
+
+### feat
+
++ __ModuleConfig:__ Add flag to prevent automatic loading ([240e306](https://github.com/elpete/cors/commit/240e3060da8d03ececcf58e550b2c39237a2f489))
+
+### fix
+
++ __build:__ Use OpenJDK instead of Oracle
+ ([b0cc52b](https://github.com/elpete/cors/commit/b0cc52b212666648b5c0cfa29403854eb0abd0e4))
+
+
 # v2.1.0
 ## 09 Aug 2019 — 21:57:25 UTC
 
