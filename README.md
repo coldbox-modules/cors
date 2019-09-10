@@ -9,6 +9,8 @@ The following is the default configuration.
 
 ```
 settings = {
+    autoRegisterInterceptor = true,
+
     allowOrigins = "*",
     allowMethods = [ "DELETE", "GET", "PATCH", "POST", "PUT", "OPTIONS" ],
     allowHeaders = [ "Content-Type", "X-Auth-Token", "Origin", "Authorization" ],
@@ -17,3 +19,10 @@ settings = {
     eventPattern = [ "^Main\.ajax$", "api" ]
 };
 ```
+
+## `autoRegisterInterceptor`
+
+If you need more control over the order of your interceptors you can
+disable the automatic loading of the CORS interceptor.  If you do this
+you will need to register it yourself (most likely in `config/ColdBox.cfc`)
+as `cors.interceptors.CORS`.

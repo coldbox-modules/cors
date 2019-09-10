@@ -2,10 +2,12 @@ component {
 
     this.name = "cors";
     this.author = "Eric Peterson";
+    this.cfmapping = "cors";
     this.webUrl = "https://github.com/elpete/cors";
 
     function configure() {
         settings = {
+            autoRegisterInterceptor = true,
             allowOrigins = function( event ) {
                 return event.getHTTPHeader( "Origin", "*" );
             },
@@ -19,10 +21,15 @@ component {
             allowCredentials = true,
             eventPattern = ".*"
         };
+    }
 
-        interceptors = [
-            { class = "#moduleMapping#.interceptors.CORS" }
-        ];
+    function onLoad() {
+        if ( settings.autoRegisterInterceptor ) {
+            controller.getInterceptorService().registerInterceptor(
+                interceptorName = "CORS",
+                interceptorClass = "#moduleMapping#.interceptors.CORS"
+            );
+        }
     }
 
 }
