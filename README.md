@@ -10,13 +10,18 @@ The following is the default configuration.
 ```
 settings = {
     autoRegisterInterceptor = true,
-
-    allowOrigins = "*",
-    allowMethods = [ "DELETE", "GET", "PATCH", "POST", "PUT", "OPTIONS" ],
-    allowHeaders = [ "Content-Type", "X-Auth-Token", "Origin", "Authorization" ],
+    allowOrigins = function( event ) {
+        return event.getHTTPHeader( "Origin", "*" );
+    },
+    allowMethods = function( event ) {
+        return event.getHTTPMethod();
+    },
+    allowHeaders = function( event ) {
+        return event.getHTTPHeader( "Access-Control-Request-Headers", "" );
+    },
     maxAge = 60 * 60 * 24, // 1 day
     allowCredentials = true,
-    eventPattern = [ "^Main\.ajax$", "api" ]
+    eventPattern = ".*"
 };
 ```
 
