@@ -1,3 +1,12 @@
+# v2.2.1
+## 17 Sep 2019 — 22:56:58 UTC
+
+### docs
+
++ __README:__ Update default settings
+ ([a10c90a](https://github.com/elpete/cors/commit/a10c90a51705942f7ff1e59a7f809ed0fd11ce52))
+
+
 # v2.2.0
 ## 10 Sep 2019 — 21:52:09 UTC
 
