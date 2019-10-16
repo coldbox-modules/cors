@@ -12,7 +12,7 @@ component {
                 return event.getHTTPHeader( "Origin", "*" );
             },
             allowMethods = function( event ) {
-                return event.getHTTPMethod();
+                return event.getHTTPHeader( "Access-Control-Request-Method", event.getHTTPMethod() );
             },
             allowHeaders = function( event ) {
                 return event.getHTTPHeader( "Access-Control-Request-Headers", "" );
