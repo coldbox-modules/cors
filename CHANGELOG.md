@@ -1,3 +1,12 @@
+# v2.2.2
+## 16 Oct 2019 — 17:58:04 UTC
+
+### other
+
++ __\*:__ fix: Use the Access-Control-Allow-Method if present ([a218419](https://github.com/elpete/cors/commit/a21841990cabf68749e22db5c1833d8df1e4c57b))
++ __\*:__ fix: OPTIONS requests are always allowed in preflight requests ([b71a57e](https://github.com/elpete/cors/commit/b71a57e1eedf3306186c37b53c25b4763e3216d5))
+
+
 # v2.2.1
 ## 17 Sep 2019 — 22:56:58 UTC
 
