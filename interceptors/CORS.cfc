@@ -28,8 +28,8 @@ component {
             return;
         }
 
-        if ( ! isAllowed( event, settings ) ) {
-            log.debug( "Method or Origin is not allowed according to CORS settings.  Aborting (403)." );
+        if ( ! isAllowedOrigin( event, settings ) ) {
+            log.debug( "Method is not allowed according to CORS settings.  Aborting (403)." );
 
             event.noExecution();
             event.setHTTPHeader( 403, "Forbidden (CORS)" );
@@ -102,8 +102,17 @@ component {
             return;
         }
 
-        if ( ! isAllowed( event, settings ) ) {
-            log.debug( "Method or Origin is not allowed according to CORS settings.  Aborting (403)." );
+        if ( ! isAllowedMethod( event, settings ) ) {
+            log.debug( "Method is not allowed according to CORS settings.  Aborting (403)." );
+
+            event.noExecution();
+            event.setHTTPHeader( 403, "Forbidden (CORS)" );
+            event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
+            return;
+        }
+
+        if ( ! isAllowedOrigin( event, settings ) ) {
+            log.debug( "Method is not allowed according to CORS settings.  Aborting (403)." );
 
             event.noExecution();
             event.setHTTPHeader( 403, "Forbidden (CORS)" );
@@ -154,7 +163,7 @@ component {
         }, false );
     }
 
-    private function isAllowed( event, settings ) {
+    private function isAllowedMethod( event, settings ) {
         var allowedMethods = settings.allowMethods;
         if ( isClosure( allowedMethods ) || isCustomFunction( allowedMethods ) ) {
             allowedMethods = allowedMethods( event );
@@ -162,10 +171,10 @@ component {
         if ( isSimpleValue( allowedMethods ) ) {
             allowedMethods = listToArray( allowedMethods, "," );
         }
-        if ( ! arrayContains( allowedMethods, event.getHTTPMethod() ) ) {
-            return false;
-        }
+        return arrayContains( allowedMethods, event.getHTTPMethod() );
+    }
 
+    private function isAllowedOrigin( event, settings ) {
         var allowedOrigins = settings.allowOrigins;
         if ( isClosure( allowedOrigins ) || isCustomFunction( allowedOrigins ) ) {
             allowedOrigins = allowedOrigins( event );

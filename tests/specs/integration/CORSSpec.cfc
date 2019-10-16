@@ -199,6 +199,25 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "OPTIONS" );
             } );
 
+            it( "OPTIONS requests are always allowed even if not defined in the allowedMethods", function() {
+                getController().getConfigSettings().modules.cors.settings.allowMethods = [ "GET", "POST" ];
+
+                prepareMock( getRequestContext() )
+                    .$( "getHTTPMethod", "OPTIONS" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "" )
+                    .$results( "example.com" )
+                    .$( "getHTTPHeader" )
+                    .$args( "Origin", "*" )
+                    .$results( "example.com" );
+                var event = execute( route = "/", renderResults = true );
+
+                var responseHeaders = getHeaders( event );
+
+                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
+                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "GET, POST" );
+            } );
+
             it( "can configure the allowed headers", function() {
                 getController().getConfigSettings().modules.cors.settings.allowHeaders = [ "Content-Type" ];
 
