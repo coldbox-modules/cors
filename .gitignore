@@ -1,4 +1,4 @@
 /testbox
 /tests/results
 /tests/resources/app/coldbox
-node_modules
+/tests/resources/app/modules

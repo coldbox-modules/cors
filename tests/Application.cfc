@@ -1,7 +1,7 @@
 component {
 
     this.name = "ColdBoxTestingSuite" & hash(getCurrentTemplatePath());
-    this.sessionManagement  = true;
+    this.sessionManagement  = false;
     this.setClientCookies   = true;
     this.sessionTimeout     = createTimeSpan( 0, 0, 15, 0 );
     this.applicationTimeout = createTimeSpan( 0, 0, 15, 0 );
@@ -16,8 +16,9 @@ component {
     this.mappings[ "/testbox" ] = rootPath & "/testbox";
 
     function onRequestStart() {
+        // applicationStop();
+        // abort;
         if ( structKeyExists( server, "lucee" ) ) {
-            applicationStop();
         }
     }
 

@@ -17,11 +17,13 @@
     "dependencies":{},
     "devDependencies":{
         "coldbox":"^5.0.0",
-        "testbox":"^2.4.0+80"
+        "testbox":"^3.0.0",
+        "hyper":"^2.1.0"
     },
     "installPaths":{
         "testbox":"testbox/",
-        "coldbox":"tests/resources/app/coldbox/"
+        "coldbox":"tests/resources/app/coldbox/",
+        "hyper":"tests/resources/app/modules/hyper/"
     },
     "scripts":{
         "postVersion":"package set location='elpete/cors#v`package version`'"
