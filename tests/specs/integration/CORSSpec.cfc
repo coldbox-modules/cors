@@ -1,64 +1,55 @@
 component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
+
+    property name="hyper" inject="HyperBuilder@hyper";
+
     this.loadColdBox = true;
     this.unloadColdBox = false;
 
+    function beforeAll() {
+        super.beforeAll();
+        hyper.defaults.setBaseUrl( "http://#CGI.http_host#/tests/resources/app/index.cfm" );
+    }
+
     function run() {
         describe( "CORS Spec", function() {
-            aroundEach( function( spec ) {
-                var originalSettings = duplicate( getController().getConfigSettings().modules.cors.settings );
-                setup();
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
-                spec.body();
-                getController().getConfigSettings().modules.cors.settings = originalSettings;
-            } );
-
             it( "activates the module", function() {
                 expect( getController().getModuleService().isModuleRegistered( "cors" ) ).toBeTrue();
             } );
 
             it( "sets the CORS headers directly", function() {
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "GET" )
-                    .$results( "GET" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( event = "Main.index", renderResults = true );
+                hyper.get( "/?fwreinit=true" );
 
-                var responseHeaders = getHeaders( event );
+                var res = hyper.withHeaders( {
+                    "Origin": "example.com",
+                    "Access-Control-Request-Method": "GET",
+                    "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                } ).get( "/main/index" )
+
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin", "The 'Access-Control-Allow-Origin' should be set." );
                 expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com", "The 'Access-Control-Allow-Origin' should be set to 'example.com'." );
             } );
 
             it( "sets the correct headers for an options request", function() {
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                hyper.get( "/?fwreinit=true" );
 
-                var responseHeaders = getHeaders( event );
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
+
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
                 expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
-                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "OPTIONS" );
+                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "GET" );
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Headers" );
                 expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type, X-Auth-Token, Origin, Authorization" );
@@ -71,20 +62,16 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             } );
 
             it( "sets the correct headers for an allowed method request", function() {
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "GET" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "GET" )
-                    .$results( "GET" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                hyper.get( "/?fwreinit=true" );
 
-                var responseHeaders = getHeaders( event );
+                var res = hyper.withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .get( "/" )
+
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
                 expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
@@ -98,437 +85,318 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             } );
 
             it( "can configure the allowed origins", function() {
-                getController().getConfigSettings().modules.cors.settings.allowOrigins = "example.com";
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "single_origin_string"
+                } );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                var resOne = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                var responseHeaders = getHeaders( event );
+                var responseHeadersOne = resOne.getHeaders();
 
-                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
-            } );
+                expect( responseHeadersOne ).toHaveKey( "Access-Control-Allow-Origin" );
+                expect( responseHeadersOne[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
-            it( "does not add headers if the origin is not allowed", function() {
-                getController().getConfigSettings().modules.cors.settings.allowOrigins = "example2.com";
+                var resTwo = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "exampleTwo.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                var responseHeadersTwo = resTwo.getHeaders();
 
-                var responseHeaders = getHeaders( event );
-
-                expect( responseHeaders ).toBeEmpty( "The response should have no headers because it is not allowed" );
+                expect( resTwo.getStatusCode() ).toBe( 403 );
+                expect( responseHeadersTwo ).notToHaveKey( "Access-Control-Allow-Origin" );
             } );
 
             it( "can accept a function for the allowed origins", function() {
-                getController().getConfigSettings().modules.cors.settings.allowOrigins = function( event ) {
-                    return event.getHTTPHeader( "Origin", "" );
-                };
+                hyper.get( "/?fwreinit=true" );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "other.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                var responseHeaders = getHeaders( event );
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
-            } );
-
-            it( "rejects the request if the origin is incorrect", function() {
-                getController().getConfigSettings().modules.cors.settings.allowOrigins = "example.com";
-
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "foobar.com" );
-                var event = execute( route = "/", renderResults = true );
-
-                var responseHeaders = getHeaders( event );
-
-                expect( getStatusCode( event ) ).toBe( 403 );
-                expect( responseHeaders ).notToHaveKey( "Access-Control-Allow-Origin" );
+                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "other.com" );
             } );
 
             it( "can configure the allowed methods", function() {
-                getController().getConfigSettings().modules.cors.settings.allowMethods = [ "OPTIONS", "GET", "POST" ];
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "allow_methods_array"
+                } );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                var responseHeaders = getHeaders( event );
-
-                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
-                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "OPTIONS, GET, POST" );
-            } );
-
-            it( "can configure the allowed methods with a closure", function() {
-                getController().getConfigSettings().modules.cors.settings.allowMethods = function( event ) {
-                    return event.getHTTPMethod();
-                };
-
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
-
-                var responseHeaders = getHeaders( event );
-
-                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
-                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "OPTIONS" );
-            } );
-
-            it( "OPTIONS requests are always allowed even if not defined in the allowedMethods", function() {
-                getController().getConfigSettings().modules.cors.settings.allowMethods = [ "GET", "POST" ];
-
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
-
-                var responseHeaders = getHeaders( event );
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
                 expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "GET, POST" );
             } );
 
+            it( "can configure the allowed methods with a closure", function() {
+                hyper.get( "/?fwreinit=true" );
+
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "PATCH",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
+
+                var responseHeaders = res.getHeaders();
+
+                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Methods" );
+                expect( responseHeaders[ "Access-Control-Allow-Methods" ] ).toBe( "PATCH" );
+            } );
+
             it( "can configure the allowed headers", function() {
-                getController().getConfigSettings().modules.cors.settings.allowHeaders = [ "Content-Type" ];
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "explicit_allow_headers"
+                } );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                var responseHeaders = getHeaders( event );
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Headers" );
                 expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type" );
             } );
 
             it( "can configure the allowed headers with a closure", function() {
-                getController().getConfigSettings().modules.cors.settings.allowHeaders = function( event ) {
-                    return event.getHTTPHeader( "Access-Control-Request-Headers", "" );
-                };
+                hyper.get( "/?fwreinit=true" );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type" );
-                var event = execute( route = "/", renderResults = true );
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                var responseHeaders = getHeaders( event );
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Headers" );
-                expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type" );
+                expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type, X-Auth-Token, Origin, Authorization" );
             } );
 
             it( "can configure if credentials are allowed", function() {
-                getController().getConfigSettings().modules.cors.settings.allowCredentials = false;
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "disallow_credentials"
+                } );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                var responseHeaders = getHeaders( event );
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Credentials" );
                 expect( responseHeaders[ "Access-Control-Allow-Credentials" ] ).toBe( "false" );
             } );
 
             it( "can configure the max age", function() {
-                getController().getConfigSettings().modules.cors.settings.maxAge = 60;
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "custom_max_age"
+                } );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                var responseHeaders = getHeaders( event );
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Max-Age" );
                 expect( responseHeaders[ "Access-Control-Max-Age" ] ).toBe( "60" );
             } );
 
             it( "interprets * as all headers passed in as `Access-Control-Request-Headers`", function() {
-                getController().getConfigSettings().modules.cors.settings.allowHeaders = "*";
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "wildcard_allow_headers"
+                } );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" );
-                var event = execute( route = "/", renderResults = true );
+                var res = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
 
-                var responseHeaders = getHeaders( event );
+                var responseHeaders = res.getHeaders();
 
                 expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Headers" );
-                expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type, X-Auth-Token, Origin" );
+                expect( responseHeaders[ "Access-Control-Allow-Headers" ] ).toBe( "Content-Type, X-Auth-Token, Origin, Authorization" );
             } );
 
             it( "can be configured with a regex for events to process", function() {
-                getController().getConfigSettings().modules.cors.settings.eventPattern = "Main\.doSomething$";
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "single_event_pattern"
+                } );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
-                var event = execute( event = "Main.index", renderResults = true );
-                var responseHeaders = getHeaders( event );
-                expect( responseHeaders ).notToHaveKey( "Access-Control-Allow-Origin" );
+                var resOne = hyper.setMethod( "OPTIONS" )
+                    .withoutRedirecting()
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/main/index" )
+                    .send();
 
-                setup();
+                expect( resOne.getHeaders() ).notToHaveKey( "Access-Control-Allow-Origin" );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
-                var event = execute( event = "Main.doSomething", renderResults = true );
-                var responseHeaders = getHeaders( event );
-                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
+                var resTwo = hyper.setMethod( "OPTIONS" )
+                    .withoutRedirecting()
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/main/doSomething" )
+                    .send();
 
-                setup();
+                expect( resTwo.getHeaders() ).toHaveKey( "Access-Control-Allow-Origin" );
+                expect( resTwo.getHeaders()[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
-                var event = execute( event = "Main.doSomethingElse", renderResults = true );
-                var responseHeaders = getHeaders( event );
-                expect( responseHeaders ).notToHaveKey( "Access-Control-Allow-Origin" );
+                var resThree = hyper.setMethod( "OPTIONS" )
+                    .withoutRedirecting()
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/main/doSomethingElse" )
+                    .send();
+
+                expect( resThree.getHeaders() ).notToHaveKey( "Access-Control-Allow-Origin" );
             } );
 
             it( "can be configured with an array of regexes for events to process", function() {
-                getController().getConfigSettings().modules.cors.settings.eventPattern = [
-                    "Main\.doSomething$",
-                    "doSomething"
-                ];
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "multiple_event_patterns"
+                } );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
-                var event = execute( event = "Main.index", renderResults = true );
-                var responseHeaders = getHeaders( event );
-                expect( responseHeaders ).notToHaveKey( "Access-Control-Allow-Origin" );
+                var resOne = hyper.setMethod( "OPTIONS" )
+                    .withoutRedirecting()
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/main/index" )
+                    .send();
 
-                setup();
+                expect( resOne.getHeaders() ).notToHaveKey( "Access-Control-Allow-Origin" );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
-                var event = execute( event = "Main.doSomething", renderResults = true );
-                var responseHeaders = getHeaders( event );
-                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
+                var resTwo = hyper.setMethod( "OPTIONS" )
+                    .withoutRedirecting()
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/main/doSomething" )
+                    .send();
 
-                setup();
+                expect( resTwo.getHeaders() ).toHaveKey( "Access-Control-Allow-Origin" );
+                expect( resTwo.getHeaders()[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPMethod", "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "OPTIONS" )
-                    .$results( "OPTIONS" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
-                var event = execute( event = "Main.doSomethingElse", renderResults = true );
-                var responseHeaders = getHeaders( event );
-                expect( responseHeaders ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeaders[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
+                var resThree = hyper.setMethod( "OPTIONS" )
+                    .withoutRedirecting()
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/main/doSomethingElse" )
+                    .send();
+
+                expect( resThree.getHeaders() ).toHaveKey( "Access-Control-Allow-Origin" );
+                expect( resThree.getHeaders()[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
             } );
 
             it( "skips over events that are cached", function() {
-                getController().getCache( "template" ).clearAllEvents();
+                hyper.get( "/?fwreinit=true" );
 
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "GET" )
-                    .$results( "GET" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getEventCacheableKey", {} )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" );
-                var eventOne = execute( event = "Main.cached", renderResults = true );
-                var responseHeadersOne = getHeaders( eventOne );
+                var resOne = hyper.withHeaders( {
+                    "Origin": "example.com"
+                } ).get( "/main/cached" );
+                expect( resOne.isSuccess() ).toBeTrue( "Response should be a successful status code. Got #resOne.getStatusCode()#" );
+                var responseHeadersOne = resOne.getHeaders();
+                expect( responseHeadersOne ).notToHaveKey( "x-coldbox-cache-response" );
                 expect( responseHeadersOne ).toHaveKey( "Access-Control-Allow-Origin" );
                 expect( responseHeadersOne[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
-                setup();
-                prepareMock( getRequestContext() )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Method", "GET" )
-                    .$results( "GET" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Origin", "*" )
-                    .$results( "example.com" )
-                    .$( "getHTTPHeader" )
-                    .$args( "Access-Control-Request-Headers", "" )
-                    .$results( "Content-Type, X-Auth-Token, Origin, Authorization" )
-                    .$( "getEventCacheableKey", {
-                        "provider": "template",
-                        "cacheable": true,
-                        "suffix": "",
-                        "cacheKey": "cbox_event-Main.cached--F05820553EEBD486F74AC25FB978E335",
-                        "lastAccessTimeout": "15",
-                        "timeout": "30"
-                    } );
-                var eventTwo = execute( event = "Main.cached", renderResults = true );
-                var responseHeadersTwo = getHeaders( eventTwo );
+                var resTwo = hyper.withHeaders( {
+                    "Origin": "exampleTwo.com"
+                } ).get( "/main/cached" );
+
+                expect( resTwo.isSuccess() ).toBeTrue( "Response should be a successful status code. Got #resTwo.getStatusCode()#" );
+                var responseHeadersTwo = resTwo.getHeaders();
+                expect( responseHeadersTwo ).toHaveKey( "x-coldbox-cache-response" );
+                expect( responseHeadersTwo[ "x-coldbox-cache-response" ] ).toBeTrue( "Response should have been event cached." );
                 expect( responseHeadersTwo ).toHaveKey( "Access-Control-Allow-Origin" );
-                expect( responseHeadersTwo[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
+                expect( responseHeadersTwo[ "Access-Control-Allow-Origin" ] ).toBe( "exampleTwo.com" );
             } );
         } );
     }

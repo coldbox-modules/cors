@@ -5,19 +5,10 @@ component {
 
     function preProcess( event, interceptData, buffer, rc, prc ) {
         log.debug( "Starting CORS lifecycle event: preProcess" );
+        log.debug( "Current event is: #event.getCurrentEvent()#" );
 
         if ( ! isCORSRequest( event ) ) {
             log.debug( "Not a CORS request. Continuing with request." );
-            return;
-        }
-
-        if ( isCachedEvent( event ) ) {
-            log.debug( "Cached event detected. Continuing with request." );
-            return;
-        }
-
-        if ( event.getHTTPMethod() != "OPTIONS" ) {
-            log.debug( "Not an OPTIONS request. Continuing with request." );
             return;
         }
 
@@ -29,6 +20,15 @@ component {
         }
 
         if ( ! isAllowedOrigin( event, settings ) ) {
+            log.debug( "Origin is not allowed according to CORS settings.  Aborting (403)." );
+
+            event.noExecution();
+            event.setHTTPHeader( 403, "Forbidden (CORS)" );
+            event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
+            return;
+        }
+
+        if ( ! isAllowedMethod( event, settings ) ) {
             log.debug( "Method is not allowed according to CORS settings.  Aborting (403)." );
 
             event.noExecution();
@@ -44,10 +44,39 @@ component {
         if ( ! isSimpleValue( allowedOrigins ) ) {
             allowedOrigins = arrayToList( allowedOrigins, ", " );
         }
+
+        if ( isCachedEvent( event ) ) {
+            if ( event.getHTTPMethod() != "OPTIONS" ) {
+                log.debug( "Cached event detected. Overriding `Access-Control-Allow-Origin` and `Access-Control-Allow-Credentials` headers." );
+
+                var cacheKey = event.getEventCacheableEntry().cacheKey;
+                var templateCache = getController().getCache( "template" );
+                var cachedEvent = templateCache.get( event.getEventCacheableEntry().cacheKey );
+
+                log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins# for the cached event." );
+                cachedEvent.responseHeaders[ "Access-Control-Allow-Origin" ] = allowedOrigins;
+
+                log.debug( "Setting the 'Access-Control-Allow-Credentials' header to #toString( settings.allowCredentials )# for the cached event." );
+                cachedEvent.responseHeaders[ "Access-Control-Allow-Credentials" ] = toString( settings.allowCredentials );
+
+                templateCache.set( cacheKey, cachedEvent );
+                return;
+            }
+
+            // OPTIONS requests for CORS should not be cached
+            log.warn( "OPTIONS requests for CORS should not be cached.  Removing the cached event.", event.getCurrentEvent() );
+            templateCache.clear( cacheKey );
+        }
+
         log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
         log.debug( "Setting the 'Access-Control-Allow-Credentials' header to #toString( settings.allowCredentials )#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
+
+        // The rest of the method is only for OPTIONS requests
+        if ( event.getHTTPMethod() != "OPTIONS" ) {
+            return;
+        }
 
         var allowedHeaders = settings.allowHeaders;
         if ( isClosure( allowedHeaders ) || isCustomFunction( allowedHeaders ) ) {
@@ -79,7 +108,7 @@ component {
         log.debug( "Setting the 'Access-Control-Max-Age' header to #settings.maxAge#." );
         event.setHTTPHeader( name = "Access-Control-Max-Age", value = settings.maxAge );
 
-        if ( event.isInvalidHTTPMethod() ) {
+        if ( event.getHTTPMethod() != "OPTIONS" && event.isInvalidHTTPMethod() ) {
             log.debug( "No handler action for an OPTIONS request.  Returning a 200 OK." );
             event.noExecution();
             event.renderData( "plain", "Preflight OK" );
@@ -87,60 +116,8 @@ component {
         }
     }
 
-    function preEvent( event, interceptData, buffer, rc, prc ) {
-        log.debug( "Starting CORS lifecycle event: preEvent" );
-
-        if ( ! isCORSRequest( event ) && ! isCachedEvent( event ) ) {
-            log.debug( "Event is not a cached event or a CORS request. Continuing with request." );
-            return;
-        }
-
-        var settings = wirebox.getInstance( dsl = "coldbox:moduleSettings:cors" );
-
-        if ( ! shouldProcessEvent( event, settings ) ) {
-            log.debug( "Should not process event with CORS according to CORS settings.  Continuing with request." );
-            return;
-        }
-
-        if ( ! isAllowedMethod( event, settings ) ) {
-            log.debug( "Method is not allowed according to CORS settings.  Aborting (403)." );
-
-            event.noExecution();
-            event.setHTTPHeader( 403, "Forbidden (CORS)" );
-            event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
-            return;
-        }
-
-        if ( ! isAllowedOrigin( event, settings ) ) {
-            log.debug( "Method is not allowed according to CORS settings.  Aborting (403)." );
-
-            event.noExecution();
-            event.setHTTPHeader( 403, "Forbidden (CORS)" );
-            event.renderData( type = "plain", data = "Forbidden (CORS)", statusCode = 403 );
-            return;
-        }
-
-        var currentHeaders = event.getResponseHeaders();
-
-        if ( ! structKeyExists( currentHeaders, "Access-Control-Allow-Origin" ) ) {
-            var allowedOrigins = settings.allowOrigins;
-            if ( isClosure( allowedOrigins ) || isCustomFunction( allowedOrigins ) ) {
-                allowedOrigins = allowedOrigins( event );
-            }
-            if ( ! isSimpleValue( allowedOrigins ) ) {
-                allowedOrigins = arrayToList( allowedOrigins, ", " );
-            }
-            log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins#." );
-            event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
-        }
-
-        if ( ! structKeyExists( currentHeaders, "Access-Control-Allow-Credentials" ) ) {
-            log.debug( "Setting the 'Access-Control-Allow-Credentials' header to #toString( settings.allowCredentials )#." );
-            event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
-        }
-    }
-
     private function isCORSRequest( event ) {
+        log.debug( "Current Origin is: #event.getHTTPHeader( "Origin", "" )#" );
         if ( event.getHTTPHeader( "Origin", "" ) == "" ) {
             return false;
         }
@@ -153,10 +130,16 @@ component {
             getController().getCache( "template" ).lookup( event.getEventCacheableEntry().cacheKey );
     }
 
+    private function getCachedEvent( event ) {
+        return getController().getCache( "template" ).get( event.getEventCacheableEntry().cacheKey );
+    }
+
     private function shouldProcessEvent( event, settings ) {
         var eventPatterns = isSimpleValue( settings.eventPattern ) ?
             settings.eventPattern.listToArray(",") :
             settings.eventPattern;
+
+        log.debug( "Allowed event patterns are: #arrayToList( eventPatterns, ", " )#" );
 
         return eventPatterns.reduce( function( any, pattern ) {
             return REFind( pattern, event.getCurrentEvent() ) > 0 ? true : any;
@@ -164,6 +147,10 @@ component {
     }
 
     private function isAllowedMethod( event, settings ) {
+        if ( event.getHTTPMethod() == "OPTIONS" ) {
+            return true;
+        }
+
         var allowedMethods = settings.allowMethods;
         if ( isClosure( allowedMethods ) || isCustomFunction( allowedMethods ) ) {
             allowedMethods = allowedMethods( event );
@@ -185,6 +172,7 @@ component {
             }
             allowedOrigins = listToArray( allowedOrigins, "," );
         }
+        log.debug( "Allowed origins are: #arrayToList( allowedOrigins, ", " )#" );
         return arrayContains( allowedOrigins, event.getHTTPHeader( "Origin", "" ) );
     }
 

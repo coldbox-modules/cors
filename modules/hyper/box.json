@@ -1,0 +1,34 @@
+{
+    "name":"hyper",
+    "version":"2.1.0",
+    "author":"",
+    "location":"coldbox-modules/hyper#v2.1.0",
+    "homepage":"https://github.com/coldbox-modules/hyper",
+    "documentation":"https://github.com/coldbox-modules/hyper",
+    "repository":{
+        "type":"git",
+        "URL":"https://github.com/coldbox-modules/hyper"
+    },
+    "bugs":"https://github.com/coldbox-modules/hyper/issues",
+    "slug":"hyper",
+    "shortDescription":"A CFML HTTP Builder",
+    "description":"A CFML HTTP Builder",
+    "type":"modules",
+    "dependencies":{},
+    "devDependencies":{
+        "testbox":"^2.4.0+80",
+        "coldbox":"^4.3.0"
+    },
+    "installPaths":{
+        "testbox":"testbox/",
+        "coldbox":"tests/resources/app/coldbox/"
+    },
+    "scripts":{
+        "postVersion":"package set location='coldbox-modules/hyper#v`package version`'"
+    },
+    "ignore":[
+        "**/.*",
+        "test",
+        "tests"
+    ]
+}

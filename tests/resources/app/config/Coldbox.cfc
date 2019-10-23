@@ -74,9 +74,9 @@
 				coldboxTracer = { class="coldbox.system.logging.appenders.ConsoleAppender" }
 			},
 			// Root Logger
-			root = { levelmax="INFO", appenders="*" },
+			root = { levelmax="DEBUG", appenders="*" },
 			// Implicit Level Categories
-			info = [ "coldbox.system" ]
+            info = [ "coldbox.system" ]
 		};
 
 		//Layout Settings
@@ -97,7 +97,77 @@
 			{class="coldbox.system.interceptors.SES",
 			 properties={}
 			}
-		];
+        ];
+
+        param url.testcase = "";
+        switch( url.testcase ) {
+            case "single_origin_string":
+                moduleSettings = {
+                    "cors" = {
+                        "allowOrigins" = "example.com"
+                    }
+                };
+                break;
+
+            case "allow_methods_array":
+                moduleSettings = {
+                    "cors" = {
+                        "allowMethods" = [ "GET", "POST" ]
+                    }
+                };
+                break;
+
+            case "explicit_allow_headers":
+                moduleSettings = {
+                    "cors" = {
+                        "allowHeaders" = [ "Content-Type" ]
+                    }
+                };
+                break;
+
+            case "disallow_credentials":
+                moduleSettings = {
+                    "cors" = {
+                        "allowCredentials" = false
+                    }
+                };
+                break;
+
+            case "custom_max_age":
+                moduleSettings = {
+                    "cors" = {
+                        "maxAge" = 60
+                    }
+                };
+                break;
+
+            case "wildcard_allow_headers":
+                moduleSettings = {
+                    "cors" = {
+                        "allowHeaders" = "*"
+                    }
+                };
+                break;
+
+            case "single_event_pattern":
+                moduleSettings = {
+                    "cors" = {
+                        "eventPattern" = "main\.doSomething$"
+                    }
+                };
+                break;
+
+            case "multiple_event_patterns":
+                moduleSettings = {
+                    "cors" = {
+                        "eventPattern" = [
+                            "main\.doSomething$",
+                            "doSomething"
+                        ]
+                    }
+                };
+                break;
+        }
 
 		/*
 		// module setting overrides
@@ -149,6 +219,6 @@
 	*/
 	function development(){
 		coldbox.customErrorTemplate = "/coldbox/system/includes/BugReport.cfm";
-	}
+    }
 
 }
