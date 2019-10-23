@@ -7,7 +7,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
 
     function beforeAll() {
         super.beforeAll();
-        hyper.defaults.setBaseUrl( "http://#CGI.http_host#/tests/resources/app/index.cfm" );
+        hyper.defaults.setBaseUrl( "http://localhost:7777/index.cfm" );
     }
 
     function run() {
