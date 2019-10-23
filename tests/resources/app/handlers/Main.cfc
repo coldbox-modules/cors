@@ -7,7 +7,6 @@
     }
 
     function cached( event, rc, prc ) cache="true" cacheTimeout="30" cacheLastAccessTimeout="15" {
-        systemOutput( "here in handler", true );
 		prc.welcomeMessage = "Welcome to ColdBox Cached!";
         event.setView( "main/index" );
     }

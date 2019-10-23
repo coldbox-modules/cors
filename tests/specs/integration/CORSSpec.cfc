@@ -23,7 +23,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                     "Origin": "example.com",
                     "Access-Control-Request-Method": "GET",
                     "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
-                } ).get( "/main/index" )
+                } ).get( "/main/index" );
 
                 var responseHeaders = res.getHeaders();
 
@@ -69,7 +69,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                         "Access-Control-Request-Method": "GET",
                         "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
                     } )
-                    .get( "/" )
+                    .get( "/" );
 
                 var responseHeaders = res.getHeaders();
 
@@ -381,11 +381,13 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 var resOne = hyper.withHeaders( {
                     "Origin": "example.com"
                 } ).get( "/main/cached" );
+
                 expect( resOne.isSuccess() ).toBeTrue( "Response should be a successful status code. Got #resOne.getStatusCode()#" );
                 var responseHeadersOne = resOne.getHeaders();
                 expect( responseHeadersOne ).notToHaveKey( "x-coldbox-cache-response" );
                 expect( responseHeadersOne ).toHaveKey( "Access-Control-Allow-Origin" );
                 expect( responseHeadersOne[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
+
 
                 var resTwo = hyper.withHeaders( {
                     "Origin": "exampleTwo.com"
