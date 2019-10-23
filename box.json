@@ -23,7 +23,7 @@
     "installPaths":{
         "testbox":"testbox/",
         "coldbox":"tests/resources/app/coldbox/",
-        "hyper":"modules/hyper/"
+        "hyper":"tests/resources/app/modules/hyper/"
     },
     "scripts":{
         "postVersion":"package set location='elpete/cors#v`package version`'"
