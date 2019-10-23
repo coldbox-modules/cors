@@ -21,7 +21,6 @@ install:
 before_script:
   - box server start cfengine=$ENGINE port=8500
   - ln -s $PWD tests/resources/app/modules/cors
-  - cd tests/resources/app && box server start cfengine=$ENGINE port=7777
 script:
   - box testbox run runner='http://127.0.0.1:8500/tests/runner.cfm'
 after_success:
