@@ -1,3 +1,11 @@
+# v3.0.0
+## 23 Oct 2019 — 16:24:43 UTC
+
+### BREAKING
+
++ __\*:__ fix: Fix event caching ([b60d18b](https://github.com/elpete/cors/commit/b60d18be53c11588a797fba99555cc808893d49e))
+
+
 # v2.2.2
 ## 16 Oct 2019 — 17:58:04 UTC
 
