@@ -1,3 +1,12 @@
+# v3.0.1
+## 24 Oct 2019 — 02:37:12 UTC
+
+### other
+
++ __\*:__ fix: Use dynamic provider instead of just template for cached events
+ ([dbe5c3e](https://github.com/elpete/cors/commit/dbe5c3e3c8f4a9b7625005fe3d2473f1d20c317d))
+
+
 # v3.0.0
 ## 23 Oct 2019 — 16:24:43 UTC
 
