@@ -126,12 +126,10 @@ component {
     }
 
     private function isCachedEvent( event ) {
-        return structKeyExists( event.getEventCacheableEntry(), "cacheKey" ) &&
-            getController().getCache( "template" ).lookup( event.getEventCacheableEntry().cacheKey );
-    }
-
-    private function getCachedEvent( event ) {
-        return getController().getCache( "template" ).get( event.getEventCacheableEntry().cacheKey );
+        var cacheableEntry = event.getEventCacheableEntry();
+        return cacheableEntry.keyExists( "cacheKey" ) &&
+            cacheableEntry.keyExists( "provider" ) &&
+            getController().getCache( cacheableEntry.provider ).lookup( cacheableEntry.cacheKey );
     }
 
     private function shouldProcessEvent( event, settings ) {

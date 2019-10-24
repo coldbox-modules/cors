@@ -388,7 +388,6 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 expect( responseHeadersOne ).toHaveKey( "Access-Control-Allow-Origin" );
                 expect( responseHeadersOne[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
 
-
                 var resTwo = hyper.withHeaders( {
                     "Origin": "exampleTwo.com"
                 } ).get( "/main/cached" );
