@@ -1,3 +1,12 @@
+# v3.0.2
+## 15 Jan 2020 — 23:37:40 UTC
+
+### fix
+
++ __CORS:__ Fix automatic options requests
+ ([2a2cdc6](https://github.com/elpete/cors/commit/2a2cdc664d6e1e9212e742d616579637ce143910))
+
+
 # v3.0.1
 ## 24 Oct 2019 — 02:37:12 UTC
 

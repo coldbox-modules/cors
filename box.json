@@ -1,8 +1,8 @@
 {
     "name":"cors",
-    "version":"3.0.1",
+    "version":"3.0.2",
     "author":"Eric Peterson",
-    "location":"elpete/cors#v3.0.1",
+    "location":"elpete/cors#v3.0.2",
     "homepage":"https://github.com/elpete/cors",
     "documentation":"https://github.com/elpete/cors",
     "repository":{
