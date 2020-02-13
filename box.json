@@ -2,7 +2,7 @@
     "name":"cors",
     "version":"3.0.2",
     "author":"Eric Peterson",
-    "location":"elpete/cors#v3.0.2",
+    "location":"forgeboxStorage",
     "homepage":"https://github.com/elpete/cors",
     "documentation":"https://github.com/elpete/cors",
     "repository":{
@@ -25,9 +25,7 @@
         "coldbox":"tests/resources/app/coldbox/",
         "hyper":"tests/resources/app/modules/hyper/"
     },
-    "scripts":{
-        "postVersion":"package set location='elpete/cors#v`package version`'"
-    },
+    "scripts":{},
     "ignore":[
         "**/.*",
         "test",
