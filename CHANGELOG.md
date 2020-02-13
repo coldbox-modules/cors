@@ -1,3 +1,11 @@
+# v3.0.3
+## 13 Feb 2020 — 17:26:11 UTC
+
+### other
+
++ __\*:__ chore: Use forgeboxStorage ([6168181](https://github.com/elpete/cors/commit/616818187fbf80de3e4f52a6db883257c15ca7f4))
+
+
 # v3.0.2
 ## 15 Jan 2020 — 23:37:40 UTC
 
