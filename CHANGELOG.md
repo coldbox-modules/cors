@@ -1,3 +1,12 @@
+# v3.0.4
+## 15 Jul 2020 — 20:39:40 UTC
+
+### fix
+
++ __CI:__ Fix for packaging up a recursive zip
+ ([e57bf90](https://github.com/elpete/cors/commit/e57bf907edf22308611c803e37baccda824e6701))
+
+
 # v3.0.3
 ## 13 Feb 2020 — 17:26:11 UTC
 
