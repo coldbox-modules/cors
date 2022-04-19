@@ -37,13 +37,7 @@ component {
             return;
         }
 
-        var allowedOrigins = settings.allowOrigins;
-        if ( isClosure( allowedOrigins ) || isCustomFunction( allowedOrigins ) ) {
-            allowedOrigins = allowedOrigins( event );
-        }
-        if ( ! isSimpleValue( allowedOrigins ) ) {
-            allowedOrigins = arrayToList( allowedOrigins, ", " );
-        }
+        var allowedOrigin = event.getHTTPHeader( "Origin", "" );
 
         if ( isCachedEvent( event ) ) {
             if ( event.getHTTPMethod() != "OPTIONS" ) {
@@ -53,8 +47,8 @@ component {
                 var templateCache = getController().getCache( "template" );
                 var cachedEvent = templateCache.get( event.getEventCacheableEntry().cacheKey );
 
-                log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins# for the cached event." );
-                cachedEvent.responseHeaders[ "Access-Control-Allow-Origin" ] = allowedOrigins;
+                log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigin# for the cached event." );
+                cachedEvent.responseHeaders[ "Access-Control-Allow-Origin" ] = allowedOrigin;
 
                 log.debug( "Setting the 'Access-Control-Allow-Credentials' header to #toString( settings.allowCredentials )# for the cached event." );
                 cachedEvent.responseHeaders[ "Access-Control-Allow-Credentials" ] = toString( settings.allowCredentials );
@@ -68,8 +62,8 @@ component {
             templateCache.clear( cacheKey );
         }
 
-        log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigins#." );
-        event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigins );
+        log.debug( "Setting the 'Access-Control-Allow-Origin' header to #allowedOrigin#." );
+        event.setHTTPHeader( name = "Access-Control-Allow-Origin", value = allowedOrigin );
         log.debug( "Setting the 'Access-Control-Allow-Credentials' header to #toString( settings.allowCredentials )#." );
         event.setHTTPHeader( name = "Access-Control-Allow-Credentials", value = toString( settings.allowCredentials ) );
 
