@@ -120,6 +120,42 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 expect( responseHeadersTwo ).notToHaveKey( "Access-Control-Allow-Origin" );
             } );
 
+            it( "can configure for multiple allowed origins", function() {
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "multiple_origin_string"
+                } );
+
+                var resOne = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
+
+                var responseHeadersOne = resOne.getHeaders();
+
+                expect( responseHeadersOne ).toHaveKey( "Access-Control-Allow-Origin" );
+                expect( responseHeadersOne[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
+
+                var resTwo = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "exampleTwo.com",
+                        "Access-Control-Request-Method": "GET",
+                        "Access-Control-Request-Headers": "Content-Type, X-Auth-Token, Origin, Authorization"
+                    } )
+                    .setUrl( "/" )
+                    .send();
+
+                var responseHeadersTwo = resTwo.getHeaders();
+
+                expect( resTwo.getStatusCode() ).toBe( 403 );
+                expect( responseHeadersTwo ).notToHaveKey( "Access-Control-Allow-Origin" );
+            } );
+
             it( "can accept a function for the allowed origins", function() {
                 hyper.get( "/?fwreinit=true" );
 

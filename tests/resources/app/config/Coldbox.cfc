@@ -109,6 +109,14 @@
                 };
                 break;
 
+            case "multiple_origin_string":
+                moduleSettings = {
+                    "cors" = {
+                        "allowOrigins" = "example.net,example.com"
+                    }
+                };
+                break;
+
             case "allow_methods_array":
                 moduleSettings = {
                     "cors" = {
