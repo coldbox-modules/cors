@@ -9,6 +9,12 @@
         "type":"git",
         "URL":"https://github.com/elpete/cors"
     },
+    "license":[
+        {
+            "type":"MIT",
+            "URL":"https://github.com/elpete/cors/LICENSE"
+        }
+    ],
     "bugs":"https://github.com/elpete/cors/issues",
     "slug":"cors",
     "shortDescription":"Add CORS headers to your app in one module",
