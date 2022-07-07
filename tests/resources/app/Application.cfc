@@ -21,6 +21,8 @@ component{
 
     this.mappings[ "/coldbox" ] = COLDBOX_APP_ROOT_PATH & "/coldbox";
     this.mappings[ "/modules_app" ] = COLDBOX_APP_ROOT_PATH & "/modules_app";
+	rootPath = REReplaceNoCase( this.mappings[ "/coldbox" ], "coldbox(\\|/)", "" );
+	this.mappings[ "/testingModuleRoot" ] = server.testingModuleRoot;
 
 	// application start
 	public boolean function onApplicationStart(){

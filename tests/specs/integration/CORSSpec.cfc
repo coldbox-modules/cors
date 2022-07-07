@@ -12,6 +12,10 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
 
     function run() {
         describe( "CORS Spec", function() {
+            beforeEach( function() {
+                setup();
+            } );
+
             it( "activates the module", function() {
                 expect( getController().getModuleService().isModuleRegistered( "cors" ) ).toBeTrue();
             } );

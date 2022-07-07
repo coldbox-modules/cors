@@ -92,12 +92,7 @@
 		};
 
 		//Register interceptors as an array, we need order
-		interceptors = [
-			//SES
-			{class="coldbox.system.interceptors.SES",
-			 properties={}
-			}
-        ];
+		interceptors = [];
 
         param url.testcase = "";
         switch( url.testcase ) {
@@ -228,5 +223,9 @@
 	function development(){
 		coldbox.customErrorTemplate = "/coldbox/system/includes/BugReport.cfm";
     }
+
+	function afterAspectsLoad() {
+		variables.controller.getModuleService().registerAndActivateModule( "cors", "testingModuleRoot" );
+	}
 
 }
