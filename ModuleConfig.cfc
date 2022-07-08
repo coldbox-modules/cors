@@ -19,7 +19,10 @@ component {
             },
             maxAge = 60 * 60 * 24, // 1 day
             allowCredentials = true,
-            eventPattern = ".*"
+            eventPattern = ".*",
+            shouldReturnPreflight = function( event ) {
+                return event.isInvalidHTTPMethod( );
+            }
         };
     }
 

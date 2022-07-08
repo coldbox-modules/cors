@@ -170,6 +170,19 @@
                     }
                 };
                 break;
+
+            case "preflight_return_closure":
+            	moduleSettings = {
+            		"cors" = {
+            			"shouldReturnPreflight" = function(event){
+            				return event.getHTTPMethod( ) eq 'OPTIONS'
+		                    AND event.getHTTPHeader('Origin', '') eq 'example.com'
+		                    AND event.getHTTPHeader('Access-Control-Request-Method', '') neq ''
+		                    AND event.getHTTPHeader('Test-header', '') eq 'test-value';
+            			}
+            		}
+            	};
+            	break;
         }
 
 		/*
