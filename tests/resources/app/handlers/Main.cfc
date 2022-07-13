@@ -20,6 +20,10 @@
         setNextEvent("main.index");
     }
 
+    function doSomethingAgain(event,rc,prc) allowedMethods="POST" {
+        setNextEvent("main.index");
+    }    
+
 	/************************************** IMPLICIT ACTIONS *********************************************/
 
 	function onAppInit(event,rc,prc){

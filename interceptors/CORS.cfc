@@ -102,8 +102,9 @@ component {
         log.debug( "Setting the 'Access-Control-Max-Age' header to #settings.maxAge#." );
         event.setHTTPHeader( name = "Access-Control-Max-Age", value = settings.maxAge );
 
-        if ( event.isInvalidHTTPMethod() ) {
-            log.debug( "No handler action for an OPTIONS request.  Returning a 200 OK." );
+        // check if preflight response should be returned
+        if ( settings.shouldReturnPreflight(event) ) {
+            log.debug( "Preflight return check passed.  Returning a 200 OK." );
             event.noExecution();
             event.renderData( "plain", "Preflight OK" );
             return;

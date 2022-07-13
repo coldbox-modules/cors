@@ -413,7 +413,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
 
                 expect( resThree.getHeaders() ).toHaveKey( "Access-Control-Allow-Origin" );
                 expect( resThree.getHeaders()[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
-            } );
+            });
 
             xit( "skips over events that are cached", function() {
                 hyper.get( "/?fwreinit=true" );
@@ -441,6 +441,28 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 expect( responseHeadersTwo ).toHaveKey( "Access-Control-Allow-Origin" );
                 expect( responseHeadersTwo[ "Access-Control-Allow-Origin" ] ).toBe( "exampleTwo.com" );
             } );
+
+
+            it( "can be configured to check if preflight should return with a custom closure", function() {
+                hyper.get( "/", {
+                    "fwreinit": "true",
+                    // testcase configures the module as needed for the test
+                    "testcase": "preflight_return_closure"
+                } );
+
+                var resOne = hyper.setMethod( "OPTIONS" )
+                    .withHeaders( {
+                        "Origin": "example.com" ,
+                        "Access-Control-Request-Method" : 'POST',
+                        "Test-header" : 'test-value'})
+                    .setUrl( "/main/doSomething" )
+                    .send();
+
+                var data = resOne.getData();
+                var data = left(data, 12); 
+                expect( data ).toBe( "Preflight OK" );
+            });
+
         } );
     }
 
