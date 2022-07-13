@@ -418,6 +418,8 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
             it( "skips over events that are cached", function() {
                 hyper.get( "/?fwreinit=true" );
 
+                sleep( 2000 );
+
                 var resOne = hyper.withHeaders( {
                     "Origin": "example.com"
                 } ).get( "/main/cached" );
