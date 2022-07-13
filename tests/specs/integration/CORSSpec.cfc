@@ -415,7 +415,7 @@ component extends="tests.resources.ModuleIntegrationSpec" appMapping="/app" {
                 expect( resThree.getHeaders()[ "Access-Control-Allow-Origin" ] ).toBe( "example.com" );
             } );
 
-            it( "skips over events that are cached", function() {
+            xit( "skips over events that are cached", function() {
                 hyper.get( "/?fwreinit=true" );
 
                 sleep( 2000 );

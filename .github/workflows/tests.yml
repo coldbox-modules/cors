@@ -69,7 +69,7 @@ jobs:
       - name: Show Server Log On Failures
         if: ${{ failure() }}
         run: |
-          box server log serverConfigFile="server-${{ matrix.cfengine }}.json"
+          box server log
       - name: Upload Debug Logs To Artifacts
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
