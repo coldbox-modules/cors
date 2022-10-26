@@ -39,11 +39,12 @@ component {
 
         var allowedOrigin = event.getHTTPHeader( "Origin", "" );
 
-        var cacheKey = event.getEventCacheableEntry().cacheKey;
-        var templateCache = getController().getCache( "template" );
-        var cachedEvent = templateCache.get( event.getEventCacheableEntry().cacheKey );
-
         if ( isCachedEvent( event ) ) {
+        
+            var cacheKey = event.getEventCacheableEntry().cacheKey;
+            var templateCache = getController().getCache( "template" );
+            var cachedEvent = templateCache.get( event.getEventCacheableEntry().cacheKey );
+            
             if ( event.getHTTPMethod() != "OPTIONS" ) {
                 log.debug( "Cached event detected. Overriding `Access-Control-Allow-Origin` and `Access-Control-Allow-Credentials` headers." );
 
