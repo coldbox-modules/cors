@@ -23,7 +23,7 @@
     "dependencies":{},
     "devDependencies":{
         "coldbox":"^6.0.0",
-        "testbox":"^4.0.0",
+        "testbox":"^6.0.0",
         "hyper":"^3.6.2"
     },
     "installPaths":{
@@ -38,7 +38,7 @@
         "tests"
     ],
     "testbox":{
-        "runner":"http://localhost:51647/tests/runner.cfm",
+        "runner":"http://localhost:60299/tests/runner.cfm",
         "verbose":false
     }
 }
