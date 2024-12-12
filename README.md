@@ -34,3 +34,8 @@ If you need more control over the order of your interceptors you can
 disable the automatic loading of the CORS interceptor.  If you do this
 you will need to register it yourself (most likely in `config/ColdBox.cfc`)
 as `cors.interceptors.CORS`.
+
+## System requirements
+- [Boxlang](https://www.boxlang.io/)
+- Lucee Server 5
+- Adobe 2018+
